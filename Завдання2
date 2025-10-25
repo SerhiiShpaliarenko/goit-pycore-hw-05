@@ -1,0 +1,31 @@
+import re
+from typing import Callable
+
+def generator_numbers(text: str):
+    # \b\d+(\.\d+)?\b - шукає цілі числа АБО числа з десятковою крапкою
+    pattern = r"\b\d+(\.\d+)?\b"
+    
+    # re.finditer знаходить усі збіги в тексті
+    for match in re.finditer(pattern, text):
+        # float() перетворює знайдене (яке є текстом) на число
+        # yield "видає" це число і ставить функцію на паузу
+        yield float(match.group())
+
+def sum_profit(text: str, func: Callable):
+    # Викликаємо функцію-генератор, яку нам передали
+    numbers_generator = func(text)
+    
+    # Вбудована функція sum() вміє працювати з генераторами,
+    # вона автоматично "витягне" з нього всі числа і додасть їх.
+    total = sum(numbers_generator)
+    return total
+
+# --- Приклад використання ---
+text = "Загальний дохід працівника складається з декількох частин: 1000.01 як основний дохід, доповнений додатковими надходженнями 27.45 і 324.00 доларів."
+total_income = sum_profit(text, generator_numbers)
+print(f"Загальний дохід: {total_income}")
+
+# Інший приклад, щоб показати, що він знайде і цілі числа
+text_with_integers = "Перший платіж 1000, другий 25.50, і третій 50."
+total_income_2 = sum_profit(text_with_integers, generator_numbers)
+print(f"Інший загальний дохід: {total_income_2}")
