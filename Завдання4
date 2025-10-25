@@ -1,0 +1,104 @@
+def input_error(func):
+    
+    def inner(*args, **kwargs):
+        try:
+            # Спробуй виконати функцію
+            return func(*args, **kwargs)
+        except ValueError:
+            # Ця помилка виникає, якщо ми даємо не 2 аргументи (add, change)
+            return "Give me name and phone please."
+        except KeyError:
+            # Ця помилка виникає, якщо ми шукаємо ім'я, якого немає
+            return "Contact not found."
+        except IndexError:
+            # Ця помилка виникає, якщо ми не дали аргументи (phone)
+            return "Enter user name."
+    return inner
+
+def parse_input(user_input):
+    
+    cmd, *args = user_input.split()
+    cmd = cmd.strip().lower()
+    return cmd, args
+
+@input_error
+def add_contact(args, contacts):
+    
+    name, phone = args  # Тут може бути ValueError
+    contacts[name] = phone
+    return "Contact added."
+
+@input_error
+def change_contact(args, contacts):
+    
+    name, phone = args  # Тут може бути ValueError
+    if name not in contacts:
+        raise KeyError  # Це зловить наш декоратор
+    contacts[name] = phone
+    return "Contact updated."
+
+@input_error
+def show_phone(args, contacts):
+    
+    name = args[0]      # Тут може бути IndexError
+    return contacts[name] # Тут може бути KeyError
+
+def show_all(contacts):
+    
+    if not contacts:
+        return "No contacts saved."
+    
+    result = ""
+    for name, phone in contacts.items():
+        result += f"{name}: {phone}\n"
+    return result.strip()
+
+def main():
+    
+    contacts = {}
+    print("Welcome to the assistant bot!")
+    while True:
+        user_input = input("Enter a command: ")
+        
+        # Обробка порожнього введення, щоб програма не зламалася
+        if not user_input:
+            print("Invalid command.")
+            continue
+            
+        try:
+            command, args = parse_input(user_input)
+        except ValueError:
+            print("Invalid command.")
+            continue
+
+        if command in ["close", "exit"]:
+            print("Good bye!")
+            break
+        elif command == "hello":
+            print("How can I help you?")
+        elif command == "add":
+            print(add_contact(args, contacts))
+        elif command == "change":
+            print(change_contact(args, contacts))
+        elif command == "phone":
+            print(show_phone(args, contacts))
+        elif command == "all":
+            print(show_all(contacts))
+        else:
+            print("Invalid command.")
+
+if __name__ == "__main__":
+    main()
+
+
+
+sergijspalarenko@MacBookAir my_project % /Users/sergijspalarenko/Desktop/my_project/venv/bi
+n/python /Users/sergijspalarenko/Desktop/my_project/task4.py
+Welcome to the assistant bot!
+Enter a command: add
+Give me name and phone please.
+Enter a command: phone
+Enter user name.
+Enter a command: phone Serhii 
+Contact not found.
+Enter a command: 
